@@ -50,27 +50,49 @@ Let's look at what the Uffizzi configuration looks like and what configuration w
 
 ### The Uffizzi configuration
 
-The `docker-compose.uffizzi.yml` in the root of the repo is the main configuration file for Uffizzi. It is an everyday docker-compose file with the following changes made to it :-
+The `docker-compose.uffizzi.yml` in the uffizzi-backstage directory of the repo is the main configuration file for Uffizzi. It is an everyday docker-compose file with the following changes made to it :-
 
 1. The `x-uffizzi` configuration. 
 
 ```yaml
 x-uffizzi:
   ingress:
-    service: frontend
-    port: 8000
+    service: backstage
+    port: 7007
 ```
 
 The above configuration let's the Uffizzi engine know that this docker-compose file has been configured for Uffizzi. Here we define the ingress which points to the frontend of the application. The final Uffizzi URL for the ephemeral environment is created routes requests directly to the frontend service in this case.
 
 2. Values for the `image` parameter for the services which need to be built on every change.
 
-The values for these are are updated to use ${BACKSTAGE_IMAGE} and the ${STOREFRONT_IMAGE} placeholders instead of local build contexts so that we can replace these placeholders with the image tags from the github action builds.
+The values for these are are updated to use `${BACKSTAGE_IMAGE}` placeholder instead of the local build context so that they can be replaced with the image tags from the github action builds.
 
-Considering that the frontend has been configured to consume the backend service, let's see how the backstage backend consumes the postgres and the redis services.
+3. Use of `$$UFFIZZI_URL`
+
+In the line where we are setting the arguments to be run with the command in the backstage service, 
+
+```
+"APP_CONFIG_app_baseUrl=$$UFFIZZI_URL APP_CONFIG_backend_baseUrl=$$UFFIZZI_URL APP_CONFIG_auth_environment='production' node packages/backend --config app-config.yaml"
+```
+
+we are setting the application and the backend URLs to UFFIZZI_URL. This will be the URL of the ephemeral environment. This let's backstage know where to query the backend from.
+
+The `APP_CONFIG_auth_environment` environment variable helps backstage understand which configuration to use. We are setting this to production. We will see the important parts of that configuration in the next section.
 
 ###  Backstage configuration for Uffizzi
 
+The ephemeral environments created for backstage will be running in production mode. Hence, backstage will be looking for the `app-config.production.yaml` configuration during runtimme. We have populated this configuration file to support Uffizzi and with other integrations which would be nice to have during testing the backstage instance. Let's look at Uffizzi specific details in the configuraion:
+
+```yaml
+app:
+  title: Backstage Uffizzi Environment
+  baseUrl: ${UFFIZZI_URL}
+
+backend:
+  baseUrl: ${UFFIZZI_URL}
+```
+
+The above two sections; the `app` and `backend` sections of the configuration require the baseUrl to be configured. We are setting this baseUrl to be the url of the ephemeral environment created. We can get this value from the `UFFIZZI_URL` environment variable from within the ephemeral environment created. 
 
 ## Next steps
 
