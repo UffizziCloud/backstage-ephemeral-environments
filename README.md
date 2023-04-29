@@ -35,6 +35,8 @@ The above command also runs `yarn install` after generating the files for the ba
 
 The folder also contains a `docker-compose.yml` which can be used for local development using docker-compose. A similar file `docker-compose.uffizzi.yml` is the earlier docker-compose with Uffizzi configuration, plus a few other edits for the configuration to work with Uffizzi. These files were added by the Uffizzi team. We will discuss this in detail in the further sections. 
 
+> Note: To use the `docker-compose.yml` and develop locally, run the `yarn build:backend` command before running `docker-compose up`.
+
 
 ### Application architecture 
 
