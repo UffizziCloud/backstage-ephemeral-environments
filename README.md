@@ -3,7 +3,7 @@
     <img alt="Uffizzi" src="https://avatars.githubusercontent.com/u/68303350?s=200&v=4" width="100" />
   </a>
   <a href="https://backstage.io">
-    <img alt="Backstage" src="https://raw.githubusercontent.com/backstage/backstage/master/microsite/static/logo_assets/png/Backstage_Identity_Assets_Artwork_RGB_04_Icon_Teal.png" height="100" />
+    <img alt="Backstage" src="public/backstage.jpeg" height="100" />
   </a>
 </p>
 <h1 align="center">
