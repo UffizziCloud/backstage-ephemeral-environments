@@ -5,6 +5,9 @@ on:
 
 jobs:
   build-backstage:
+    defaults:
+      run:
+        working-directory: ./uffizzi-backstage
     env:
       NODE_OPTIONS: --max-old-space-size=4096
       UFFIZZI_URL: https://uffizzi.com
@@ -25,17 +28,14 @@ jobs:
 
       - name: yarn install
         uses: backstage/actions/yarn-install@v0.6.3
-        working-directory: ./uffizzi-backstage
         with:
           cache-prefix: linux-v16
 
       - name: typescript build
-        working-directory: ./uffizzi-backstage
         run: |
           yarn tsc
 
       - name: backstage build
-        working-directory: ./uffizzi-backstage
         run: |
           yarn build:backend
 
