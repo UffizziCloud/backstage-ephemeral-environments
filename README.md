@@ -42,11 +42,11 @@ The folder also contains a `docker-compose.yml` which can be used for local deve
 
 The following is the architecutre of the Backstage application we will be building and previewing in Uffizzi in this repo. 
 
+![alt text](public/backstage_arch.png?raw=true "backstage architecture in this repo")
 
-<!-- ![alt text](public/architecture.png?raw=true "Architecture") -->
+The architecture is very straightforward here with backstage and the postgres instance it is using as the database. By default backstage comes with better-sqlite configured but to showcase the usage of multiple services working in tandem with backstage we are using a database service for backstage.
 
-Let's look at what the Uffizzi configuration looks like and what configuration we need to add to make the above possible. 
-
+Let's look at what the Uffizzi configuration looks like and what options we need to add to make the above work in the context of an ephemeral environment. 
 
 ### The Uffizzi configuration
 
@@ -71,11 +71,11 @@ The values for these are are updated to use `${BACKSTAGE_IMAGE}` placeholder ins
 
 In the line where we are setting the arguments to be run with the command in the backstage service, 
 
-```
-"APP_CONFIG_app_baseUrl=$$UFFIZZI_URL APP_CONFIG_backend_baseUrl=$$UFFIZZI_URL APP_CONFIG_auth_environment='production' node packages/backend --config app-config.yaml"
+```bash
+APP_CONFIG_app_baseUrl=$$UFFIZZI_URL APP_CONFIG_backend_baseUrl=$$UFFIZZI_URL APP_CONFIG_auth_environment='production' node packages/backend --config app-config.yaml
 ```
 
-we are setting the application and the backend URLs to UFFIZZI_URL. This will be the URL of the ephemeral environment. This let's backstage know where to query the backend from.
+we are setting the application and the backend URLs to have the same value as the `UFFIZZI_URL` environment variable. This let's backstage instance know where to query the backend from. We aren't hosting a different service for the backend so in this case the value for the backend URL and the app URL will stay the same.
 
 The `APP_CONFIG_auth_environment` environment variable helps backstage understand which configuration to use. We are setting this to production. We will see the important parts of that configuration in the next section.
 
