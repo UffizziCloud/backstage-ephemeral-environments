@@ -2,9 +2,6 @@ name: Preview (build)
 on:
   pull_request:
     types: [opened, synchronize, reopened, closed]
-    paths-ignore:
-      - 'microsite/**'
-      - '*.md'
 
 jobs:
   build-backstage:
