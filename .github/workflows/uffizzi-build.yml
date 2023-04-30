@@ -31,10 +31,6 @@ jobs:
         with:
           cache-prefix: linux-v16
 
-      - name: typescript build
-        run: |
-          yarn tsc
-
       - name: backstage build
         run: |
           yarn build:backend
