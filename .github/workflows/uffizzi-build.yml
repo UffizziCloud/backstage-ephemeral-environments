@@ -70,7 +70,7 @@ jobs:
     needs:
       - build-backstage
     outputs:
-      compose-file-cache-key: ${{ steps.hash.outputs.hash }}
+      manifests-cache-key: ${{ steps.hash.outputs.hash }}
     steps:
       - name: Checkout git repo
         uses: actions/checkout@v3
@@ -80,11 +80,11 @@ jobs:
           kustomize edit set image backstage/backstage=${{ needs.build-backstage.outputs.tags }}
           kustomize build . > manifests.rendered.yml
           cat manifests.rendered.yml
-      - name: Upload Rendered Compose File as Artifact
+      - name: Upload Rendered Manifests File as Artifact
         uses: actions/upload-artifact@v3
         with:
           name: preview-spec
-          path: docker-compose.rendered.yml
+          path: manifests.rendered.yml
           retention-days: 2
       - name: Upload PR Event as Artifact
         uses: actions/upload-artifact@v3
