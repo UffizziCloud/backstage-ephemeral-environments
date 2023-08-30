@@ -83,6 +83,10 @@ jobs:
           cat event.json
 
   deploy-uffizzi-preview:
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
     name: Deploy to Uffizzi Virtual Cluster
     needs:
     - cache-manifests-file
