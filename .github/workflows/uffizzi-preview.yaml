@@ -183,7 +183,7 @@ jobs:
 
         edit-mode: replace
 
-  deploy-uffizzi-preview:
+  delete-uffizzi-preview:
     permissions:
       contents: read
       pull-requests: write
