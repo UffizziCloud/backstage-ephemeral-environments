@@ -16,6 +16,7 @@ jobs:
       manifests-cache-key: ${{ env.MANIFESTS_FILE_HASH }}
       git-ref: ${{ env.GIT_REF }}
       pr-number: ${{ env.PR_NUMBER }}
+      action: ${{ env.ACTION }}
     steps:
       - name: 'Download artifacts'
         # Fetch output (zip archive) from the workflow run that triggered this workflow.
@@ -70,6 +71,10 @@ jobs:
         id: pr
         run: echo "PR_NUMBER=${{ fromJSON(env.EVENT_JSON).number }}" >> $GITHUB_ENV
 
+      - name: Read Event Type from Event Object
+        id: action
+        run: echo "ACTION=${{ fromJSON(env.EVENT_JSON).action }}" >> $GITHUB_ENV
+
       - name: Read Git Ref From Event Object
         id: ref
         run: echo "GIT_REF=${{ fromJSON(env.EVENT_JSON).pull_request.head.sha }}" >> $GITHUB_ENV
@@ -90,7 +95,7 @@ jobs:
     name: Deploy to Uffizzi Virtual Cluster
     needs:
     - cache-manifests-file
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' }} && ${{ needs.cache-manifests-file.outputs.action != "closed" }}
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -177,3 +182,34 @@ jobs:
           Access the `backstage` endpoint at [`${{ steps.prev.outputs.backstage_url }}`](http://${{ steps.prev.outputs.backstage_url }})
 
         edit-mode: replace
+
+  deploy-uffizzi-preview:
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+    name: Delete the Uffizzi Virtual Cluster
+    needs:
+    - cache-manifests-file
+    if: ${{ needs.cache-manifests-file.outputs.action == "closed" }}
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Delete Virtual Cluster
+      uses: UffizziCloud/cluster-action@main
+      with:
+        cluster-name: pr-${{ needs.cache-manifests-file.outputs.pr-number }}
+        server: https://app.uffizzi.com
+        action: delete
+
+    # Identify comment to be updated
+    - name: Find comment for Ephemeral Environment
+      uses: peter-evans/find-comment@v2
+      id: find-comment
+      with:
+        issue-number: ${{ needs.cache-manifests-file.outputs.pr-number }}
+        comment-author: "github-actions[bot]"
+        body-includes: pr-${{ needs.cache-manifests-file.outputs.pr-number }}
+        direction: last
