@@ -94,7 +94,6 @@ jobs:
           name: preview-spec
           path: ${{ github.event_path }}
           retention-days: 2
-<<<<<<< HEAD
 
   delete-preview:
     name: Call for Preview Deletion
@@ -108,5 +107,3 @@ jobs:
           name: preview-spec
           path: ${{ github.event_path }}
           retention-days: 2
-=======
->>>>>>> 2f6a710 (test)
