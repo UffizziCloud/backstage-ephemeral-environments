@@ -92,7 +92,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
-    Identify comment to be updated
+    # Identify comment to be updated
     - name: Find comment for Ephemeral Environment
       uses: peter-evans/find-comment@v2
       id: find-comment
