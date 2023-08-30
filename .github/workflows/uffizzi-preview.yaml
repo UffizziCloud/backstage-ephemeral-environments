@@ -99,7 +99,7 @@ jobs:
       with:
         issue-number: ${{ needs.cache-manifests-file.outputs.pr-number }}
         comment-author: "github-actions[bot]"
-        body-includes: pr-${{ env.PR_NUMBER }}
+        body-includes: pr-${{ needs.cache-manifests-file.outputs.pr-number }}
         direction: last
 
     # Create/Update comment with action deployment status
@@ -108,7 +108,7 @@ jobs:
       uses: peter-evans/create-or-update-comment@v2
       with:
         comment-id: ${{ steps.find-comment.outputs.comment-id }}
-        issue-number: ${{ github.event.pull_request.number }}
+        issue-number: ${{ needs.cache-manifests-file.outputs.pr-number }}
         body: |
           ## Uffizzi Ephemeral Environment - Virtual Cluster
 
@@ -123,18 +123,18 @@ jobs:
     - name: Connect to Virtual Cluster
       uses: UffizziCloud/cluster-action@main
       with:
-        cluster-name: pr-${{ github.event.pull_request.number }}
+        cluster-name: pr-${{ needs.cache-manifests-file.outputs.pr-number }}
         server: https://app.uffizzi.com
 
     - name: Create or Update Comment with Deployment URL
       uses: peter-evans/create-or-update-comment@v2
       with:
         comment-id: ${{ steps.notification.outputs.comment-id }}
-        issue-number: ${{ github.event.pull_request.number }}
+        issue-number: ${{ needs.cache-manifests-file.outputs.pr-number }}
         body: |
           ## Uffizzi Ephemeral Environment - Virtual Cluster
 
-          Your cluster `pr-${{ github.event.pull_request.number }}` was successfully created. Learn more about [Uffizzi virtual clusters](https://docs.uffizzi.com/virtual-clusters)
+          Your cluster `pr-${{ needs.cache-manifests-file.outputs.pr-number }}` was successfully created. Learn more about [Uffizzi virtual clusters](https://docs.uffizzi.com/virtual-clusters)
           To connect to this cluster, follow these steps:
 
         edit-mode: replace
