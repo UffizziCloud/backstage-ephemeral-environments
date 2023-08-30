@@ -57,7 +57,7 @@ jobs:
         if: ${{ fromJSON(env.EVENT_JSON).action != 'closed' }}
         run: |
           ls
-          echo "MANIFESTS_FILE_HASH=$(md5sum ./uffizzi-backstage/manifests.rendered.yml | awk '{ print $1 }')" >> $GITHUB_ENV
+          echo "MANIFESTS_FILE_HASH=$(md5sum manifests.rendered.yml | awk '{ print $1 }')" >> $GITHUB_ENV
 
       - name: Cache Manifests File
         if: ${{ fromJSON(env.EVENT_JSON).action != 'closed' }}
@@ -86,7 +86,7 @@ jobs:
     name: Deploy to Uffizzi Virtual Cluster
     needs:
     - cache-manifests-file
-    if: ${{ github.event_name == 'pull_request' && github.event.action != 'closed' }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
