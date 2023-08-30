@@ -97,7 +97,7 @@ jobs:
       uses: peter-evans/find-comment@v2
       id: find-comment
       with:
-        issue-number: ${{ env.PR_NUMBER }}
+        issue-number: ${{ needs.cache-manifests-file.outputs.pr-number }}
         comment-author: "github-actions[bot]"
         body-includes: pr-${{ env.PR_NUMBER }}
         direction: last
