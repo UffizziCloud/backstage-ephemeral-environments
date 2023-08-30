@@ -50,6 +50,10 @@ jobs:
           images: registry.uffizzi.com/${{ env.UUID_TAG_APP }}
           tags: type=raw,value=60d
 
+      - name: Where are we
+        id: where
+        run: ls && echo `pwd`
+
       - name: Build Image
         uses: docker/build-push-action@v4
         with:
