@@ -7,62 +7,62 @@ on:
       - main
 
 jobs:
-  # build-backstage:
-  #   defaults:
-  #     run:
-  #       working-directory: ./uffizzi-backstage
-  #   env:
-  #     NODE_OPTIONS: --max-old-space-size=4096
-  #     UFFIZZI_URL: https://uffizzi.com
-  #   name: Build PR image
-  #   runs-on: ubuntu-latest
-  #   if: ${{ github.event_name != 'pull_request' || github.event.action != 'closed' }}
-  #   outputs:
-  #     tags: ${{ steps.meta.outputs.tags }}
-  #   steps:
-  #     - name: checkout
-  #       uses: actions/checkout@v3
+  build-backstage:
+    defaults:
+      run:
+        working-directory: ./uffizzi-backstage
+    env:
+      NODE_OPTIONS: --max-old-space-size=4096
+      UFFIZZI_URL: https://uffizzi.com
+    name: Build PR image
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'pull_request' || github.event.action != 'closed' }}
+    outputs:
+      tags: ${{ steps.meta.outputs.tags }}
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
 
-  #     - name: setup-node
-  #       uses: actions/setup-node@v3
-  #       with:
-  #         node-version: 16.x
-  #         registry-url: https://registry.npmjs.org/
+      - name: setup-node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          registry-url: https://registry.npmjs.org/
 
-  #     - name: yarn install
-  #       uses: backstage/actions/yarn-install@v0.6.3
-  #       with:
-  #         cache-prefix: linux-v16
+      - name: yarn install
+        uses: backstage/actions/yarn-install@v0.6.3
+        with:
+          cache-prefix: linux-v16
 
-  #     - name: backstage build
-  #       run: |
-  #         yarn install
-  #         yarn build:backend
+      - name: backstage build
+        run: |
+          yarn install
+          yarn build:backend
 
-  #     - name: Set up Docker Buildx
-  #       uses: docker/setup-buildx-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
-  #     - name: Generate UUID image name
-  #       id: uuid
-  #       run: echo "UUID_TAG_APP=$(uuidgen)" >> $GITHUB_ENV
+      - name: Generate UUID image name
+        id: uuid
+        run: echo "UUID_TAG_APP=$(uuidgen)" >> $GITHUB_ENV
 
-  #     - name: Docker metadata
-  #       id: meta
-  #       uses: docker/metadata-action@v4
-  #       with:
-  #         images: registry.uffizzi.com/${{ env.UUID_TAG_APP }}
-  #         tags: type=raw,value=60d
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: registry.uffizzi.com/${{ env.UUID_TAG_APP }}
+          tags: type=raw,value=60d
 
-  #     - name: Build Image
-  #       uses: docker/build-push-action@v4
-  #       with:
-  #         context: ./uffizzi-backstage
-  #         file: uffizzi-backstage/packages/backend/Dockerfile
-  #         tags: ${{ steps.meta.outputs.tags }}
-  #         labels: ${{ steps.meta.outputs.labels }}
-  #         push: true
-  #         cache-from: type=gha
-  #         cache-to: type=gha,mode=max
+      - name: Build Image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./uffizzi-backstage
+          file: uffizzi-backstage/packages/backend/Dockerfile
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   render-kustomize:
     defaults:
@@ -70,16 +70,16 @@ jobs:
         working-directory: ./uffizzi-backstage
     name: Render Kustomize Manifests
     runs-on: ubuntu-latest
-    # needs:
-    #   - build-backstage
+    needs:
+      - build-backstage
     steps:
       - name: Checkout git repo
         uses: actions/checkout@v3
       - name: Update image with kustomize
         run: |
           # update image after the build above
-          # kustomize edit set image backstage/backstage=${{ needs.build-backstage.outputs.tags }}
-          kustomize edit set image backstage/backstage=registry.uffizzi.com/0df97996-17bc-4e14-a110-b147bebeaf8b:60d
+          kustomize edit set image backstage/backstage=${{ needs.build-backstage.outputs.tags }}
+          # kustomize edit set image backstage/backstage=registry.uffizzi.com/0df97996-17bc-4e14-a110-b147bebeaf8b:60d
           kustomize build . > manifests.rendered.yml
           cat manifests.rendered.yml
       - name: Upload Rendered Manifests File as Artifact
