@@ -2,9 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: backstage
-  labels:
-    app.uffizzi.com/envvar-override-key-0: UFFIZZI_URL
-    # app.uffizzi.com/envvar-override-value-0: .default.ingress.backstage.rules[0].host
 spec:
   replicas: 1
   selector:
