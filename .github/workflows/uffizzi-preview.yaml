@@ -8,12 +8,12 @@ on:
       - completed
 
 jobs:
-  cache-compose-file:
-    name: Cache Compose File
+  cache-manifests-file:
+    name: Cache Manifests File
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     outputs:
-      compose-file-cache-key: ${{ env.MANIFESTS_FILE_HASH }}
+      manifests-cache-key: ${{ env.MANIFESTS_FILE_HASH }}
       git-ref: ${{ env.GIT_REF }}
       pr-number: ${{ env.PR_NUMBER }}
     steps:
@@ -51,13 +51,13 @@ jobs:
           cat event.json >> $GITHUB_ENV
           echo -e '\nEOF' >> $GITHUB_ENV
 
-      - name: Hash Rendered Compose File
+      - name: Hash Rendered Manifests File
         id: hash
-        # If the previous workflow was triggered by a PR close event, we will not have a compose file artifact.
+        # If the previous workflow was triggered by a PR close event, we will not have a manifests file artifact.
         if: ${{ fromJSON(env.EVENT_JSON).action != 'closed' }}
         run: echo "MANIFESTS_FILE_HASH=$(md5sum manifests.rendered.yml | awk '{ print $1 }')" >> $GITHUB_ENV
 
-      - name: Cache Rendered Compose File
+      - name: Cache Manifests File
         if: ${{ fromJSON(env.EVENT_JSON).action != 'closed' }}
         uses: actions/cache@v3
         with:
@@ -80,21 +80,77 @@ jobs:
           echo "Manifests file hash: ${{ env.MANIFESTS_FILE_HASH }}"
           cat event.json
 
-  # deploy-uffizzi-preview:
-  #   name: Use Remote Workflow to Preview on Uffizzi
-  #   needs:
-  #     - cache-compose-file
-  #   if: ${{ github.event.workflow_run.conclusion == 'success' }}
-  #   uses: UffizziCloud/preview-action/.github/workflows/reusable.yaml@v2
-  #   with:
-  #     # If this workflow was triggered by a PR close event, cache-key will be an empty string
-  #     # and this reusable workflow will delete the preview deployment.
-  #     compose-file-cache-key: ${{ needs.cache-compose-file.outputs.compose-file-cache-key }}
-  #     compose-file-cache-path: docker-compose.rendered.yml
-  #     git-ref: ${{ needs.cache-compose-file.outputs.git-ref }}
-  #     pr-number: ${{ needs.cache-compose-file.outputs.pr-number }}
-  #     server: https://app.uffizzi.com
-  #   permissions:
-  #     contents: read
-  #     pull-requests: write
-  #     id-token: write
+  deploy-uffizzi-preview:
+    name: Deploy to Uffizzi Virtual Cluster
+    needs:
+    - cache-manifests-file
+    if: ${{ github.event_name == 'pull_request' && github.event.action != 'closed' }}
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    # Identify comment to be updated
+    - name: Find comment for Ephemeral Environment
+      uses: peter-evans/find-comment@v2
+      id: find-comment
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        comment-author: "github-actions[bot]"
+        body-includes: pr-${{ github.event.pull_request.number }}
+        direction: last
+
+    # Create/Update comment with action deployment status
+    - name: Create or Update Comment with Deployment Notification
+      id: notification
+      uses: peter-evans/create-or-update-comment@v2
+      with:
+        comment-id: ${{ steps.find-comment.outputs.comment-id }}
+        issue-number: ${{ github.event.pull_request.number }}
+        body: |
+          ## Uffizzi Ephemeral Environment - Virtual Cluster
+
+          :cloud: deploying ...
+
+          :gear: Updating now by workflow run [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
+
+          Download the Uffizzi CLI to interact with the upcoming virtual cluster
+          https://docs.uffizzi.com/install
+        edit-mode: replace
+
+    - name: Connect to Virtual Cluster
+      uses: UffizziCloud/cluster-action@main
+      with:
+        cluster-name: pr-${{ github.event.pull_request.number }}
+        server: https://app.uffizzi.com
+
+    - name: Create or Update Comment with Deployment URL
+      uses: peter-evans/create-or-update-comment@v2
+      with:
+        comment-id: ${{ steps.notification.outputs.comment-id }}
+        issue-number: ${{ github.event.pull_request.number }}
+        body: |
+          ## Uffizzi Ephemeral Environment - Virtual Cluster
+
+          Your cluster `pr-${{ github.event.pull_request.number }}` was successfully created. Learn more about [Uffizzi virtual clusters](https://docs.uffizzi.com/virtual-clusters)
+          To connect to this cluster, follow these steps:
+
+        edit-mode: replace
+
+    # name: Use Remote Workflow to Preview on Uffizzi
+    # needs:
+    #   - cache-compose-file
+    # if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    # uses: UffizziCloud/preview-action/.github/workflows/reusable.yaml@v2
+    # with:
+    #   # If this workflow was triggered by a PR close event, cache-key will be an empty string
+    #   # and this reusable workflow will delete the preview deployment.
+    #   compose-file-cache-key: ${{ needs.cache-compose-file.outputs.compose-file-cache-key }}
+    #   compose-file-cache-path: docker-compose.rendered.yml
+    #   git-ref: ${{ needs.cache-compose-file.outputs.git-ref }}
+    #   pr-number: ${{ needs.cache-compose-file.outputs.pr-number }}
+    #   server: https://app.uffizzi.com
+    # permissions:
+    #   contents: read
+    #   pull-requests: write
+    #   id-token: write
