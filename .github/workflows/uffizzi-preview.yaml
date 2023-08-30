@@ -92,14 +92,14 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
-    # Identify comment to be updated
+    Identify comment to be updated
     - name: Find comment for Ephemeral Environment
       uses: peter-evans/find-comment@v2
       id: find-comment
       with:
-        issue-number: ${{ github.event.pull_request.number }}
+        issue-number: ${{ env.PR_NUMBER }}
         comment-author: "github-actions[bot]"
-        body-includes: pr-${{ github.event.pull_request.number }}
+        body-includes: pr-${{ env.PR_NUMBER }}
         direction: last
 
     # Create/Update comment with action deployment status
