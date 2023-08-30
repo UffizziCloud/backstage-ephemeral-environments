@@ -174,6 +174,6 @@ jobs:
               Optional: Update your kubeconfig: `uffizzi cluster update-kubeconfig pr-${{ needs.cache-manifests-file.outputs.pr-number }} --kubeconfig=[KUBECONFIG]`, replacing `[KUBECONFIG]` with the path to your kubeconfig file.
           After updating your kubeconfig, you can manage your cluster with `kubectl`, `kustomize`, `helm`, and other tools that use kubeconfig files: `kubectl get namespace --kubeconfig [KUBECONFIG]`
 
-          Access the `vote` endpoint at [`${{ steps.prev.outputs.backstage_url }}`](http://${{ steps.prev.outputs.backstage_url }})
+          Access the `backstage` endpoint at [`${{ steps.prev.outputs.backstage_url }}`](http://${{ steps.prev.outputs.backstage_url }})
 
         edit-mode: replace
