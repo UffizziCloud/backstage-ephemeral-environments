@@ -130,6 +130,25 @@ jobs:
         cluster-name: pr-${{ needs.cache-manifests-file.outputs.pr-number }}
         server: https://app.uffizzi.com
 
+    - name: Fetch cached Manifests File
+      id: cache
+      if: ${{ contains(fromJSON('["create", "update"]'), env.UFFIZZI_ACTION) }}
+      uses: actions/cache@v3
+      with:
+        path: manifests.rendered.yml
+        key: ${{ needs.cache-manifests-file.outputs.manifests-cache-key }}
+
+    - name: Kustomize and Apply Manifests
+      id: prev
+      run: |
+        # Apply kustomized manifests to virtual cluster.
+        kubectl apply -f manifests.rendered.yml
+
+        # Allow uffizzi to sync the resources
+        sleep 5
+
+        kubectl get deployment
+
     - name: Create or Update Comment with Deployment URL
       uses: peter-evans/create-or-update-comment@v2
       with:
