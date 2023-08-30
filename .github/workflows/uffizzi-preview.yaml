@@ -142,12 +142,12 @@ jobs:
       id: prev
       run: |
         # Apply kustomized manifests to virtual cluster.
-        kubectl apply -f manifests.rendered.yml
+        kubectl apply -f manifests.rendered.yml --kubeconfig ./kubeconfig
 
         # Allow uffizzi to sync the resources
         sleep 5
 
-        kubectl get deployment
+        kubectl get deployment --kubeconfig ./kubeconfig
 
     - name: Create or Update Comment with Deployment URL
       uses: peter-evans/create-or-update-comment@v2
