@@ -87,7 +87,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: preview-spec
-          path: manifests.rendered.yml
+          path: ./uffizzi-backstage/manifests.rendered.yml
           retention-days: 2
       - name: Upload PR Event as Artifact
         uses: actions/upload-artifact@v3

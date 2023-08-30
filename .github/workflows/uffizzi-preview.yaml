@@ -55,7 +55,9 @@ jobs:
         id: hash
         # If the previous workflow was triggered by a PR close event, we will not have a manifests file artifact.
         if: ${{ fromJSON(env.EVENT_JSON).action != 'closed' }}
-        run: echo "MANIFESTS_FILE_HASH=$(md5sum manifests.rendered.yml | awk '{ print $1 }')" >> $GITHUB_ENV
+        run: |
+          ls
+          echo "MANIFESTS_FILE_HASH=$(md5sum ./uffizzi-backstage/manifests.rendered.yml | awk '{ print $1 }')" >> $GITHUB_ENV
 
       - name: Cache Manifests File
         if: ${{ fromJSON(env.EVENT_JSON).action != 'closed' }}
