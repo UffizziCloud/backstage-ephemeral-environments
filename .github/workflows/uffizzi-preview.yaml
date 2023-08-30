@@ -213,3 +213,12 @@ jobs:
         comment-author: "github-actions[bot]"
         body-includes: pr-${{ needs.cache-manifests-file.outputs.pr-number }}
         direction: last
+
+    - name: Update Comment with Deletion
+      uses: peter-evans/create-or-update-comment@v2
+      with:
+        comment-id: ${{ steps.find-comment.outputs.comment-id }}
+        issue-number: ${{ github.event.pull_request.number }}
+        body: |
+          Uffizzi Cluster `pr-${{ needs.cache-manifests-file.outputs.pr-number }}` was deleted.
+        edit-mode: replace
