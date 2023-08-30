@@ -95,7 +95,7 @@ jobs:
     name: Deploy to Uffizzi Virtual Cluster
     needs:
     - cache-manifests-file
-    if: ${{ github.event.workflow_run.conclusion == 'success' }} && ${{ needs.cache-manifests-file.outputs.action != "closed" }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' && needs.cache-manifests-file.outputs.action != 'closed' }}
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -191,7 +191,7 @@ jobs:
     name: Delete the Uffizzi Virtual Cluster
     needs:
     - cache-manifests-file
-    if: ${{ needs.cache-manifests-file.outputs.action == "closed" }}
+    if: ${{ needs.cache-manifests-file.outputs.action == 'closed' }}
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
