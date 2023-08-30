@@ -159,10 +159,21 @@ jobs:
       uses: peter-evans/create-or-update-comment@v2
       with:
         comment-id: ${{ steps.notification.outputs.comment-id }}
-        issue-number: ${{ needs.cache-manifests-file.outputs.pr-number }}
+        issue-number: ${{ github.event.pull_request.number }}
         body: |
           ## Uffizzi Ephemeral Environment - Virtual Cluster
 
           Your cluster `pr-${{ needs.cache-manifests-file.outputs.pr-number }}` was successfully created. Learn more about [Uffizzi virtual clusters](https://docs.uffizzi.com/virtual-clusters)
           To connect to this cluster, follow these steps:
+
+          1. Download and install the Uffizzi CLI from https://docs.uffizzi.com/install
+          2. Login to Uffizzi: `uffizzi login`
+          3. Update your kubeconfig: `uffizzi cluster update-kubeconfig pr-${{ needs.cache-manifests-file.outputs.pr-number }}`. This command will update your local `~/.kube/config`.
+          If you want to provide an alternate location follow the optional step (the next step) instead.
+
+              Optional: Update your kubeconfig: `uffizzi cluster update-kubeconfig pr-${{ needs.cache-manifests-file.outputs.pr-number }} --kubeconfig=[KUBECONFIG]`, replacing `[KUBECONFIG]` with the path to your kubeconfig file.
+          After updating your kubeconfig, you can manage your cluster with `kubectl`, `kustomize`, `helm`, and other tools that use kubeconfig files: `kubectl get namespace --kubeconfig [KUBECONFIG]`
+
+          Access the `vote` endpoint at [`${{ steps.prev.outputs.backstage_url }}`](http://${{ steps.prev.outputs.backstage_url }})
+
         edit-mode: replace
