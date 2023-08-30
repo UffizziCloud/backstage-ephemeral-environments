@@ -143,22 +143,16 @@ jobs:
       run: |
         # Apply kustomized manifests to virtual cluster.
         kubectl apply -f manifests.rendered.yml --kubeconfig ./kubeconfig
-
         # Allow uffizzi to sync the resources
         sleep 10
-
         # Get the hostnames assigned by uffizzi
         export BACKSTAGE_HOST=$(kubectl get ingress backstage --kubeconfig kubeconfig -o json | jq '.spec.rules[0].host' | tr -d '"')
-
         # Patch backstage deployment to use UFFIZZI_URL
-        kubectl patch deployment backstage -p '{"spec": {"template": {"spec": {"containers": [{"name": "backstage", "env": [{"name": "UFFIZZI_URL", "value": "${BACKSTAGE_HOST}"}]}]}}}}'
-
+        kubectl patch deployment backstage -p '{"spec": {"template": {"spec": {"containers": [{"name": "backstage", "env": [{"name": "UFFIZZI_URL", "value": "$BACKSTAGE_HOST"}]}]}}}}'
         if [[ ${RUNNER_DEBUG} == 1 ]]; then
           kubectl get all --kubeconfig ./kubeconfig
         fi
-
         echo "backstage_url=${BACKSTAGE_HOST}" >> $GITHUB_OUTPUT
-
         echo "Access the \`backstage\` endpoint at [\`${BACKSTAGE_HOST}\`](http://${BACKSTAGE_HOST})" >> $GITHUB_STEP_SUMMARY
 
     - name: Create or Update Comment with Deployment URL
