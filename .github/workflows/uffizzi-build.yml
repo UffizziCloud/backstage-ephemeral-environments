@@ -1,4 +1,4 @@
-name: Preview (build)
+name: Uffizzi Cluster Preview (build)
 on:
   pull_request:
     types: [opened, synchronize, reopened, closed]

@@ -1,4 +1,4 @@
-name: Preview (deploy)
+name: Uffizzi Cluster Preview (deploy)
 
 on:
   workflow_run:
@@ -145,9 +145,21 @@ jobs:
         kubectl apply -f manifests.rendered.yml --kubeconfig ./kubeconfig
 
         # Allow uffizzi to sync the resources
-        sleep 5
+        sleep 10
 
-        kubectl get deployment --kubeconfig ./kubeconfig
+        # Get the hostnames assigned by uffizzi
+        export BACKSTAGE_HOST=$(kubectl get ingress backstage --kubeconfig kubeconfig -o json | jq '.spec.rules[0].host' | tr -d '"')
+
+        # Patch backstage deployment to use UFFIZZI_URL
+        kubectl patch deployment backstage -p '{"spec": {"template": {"spec": {"containers": [{"name": "backstage", "env": [{"name": "UFFIZZI_URL", "value": "${BACKSTAGE_HOST}"}]}]}}}}'
+
+        if [[ ${RUNNER_DEBUG} == 1 ]]; then
+          kubectl get all --kubeconfig ./kubeconfig
+        fi
+
+        echo "backstage_url=${BACKSTAGE_HOST}" >> $GITHUB_OUTPUT
+
+        echo "Access the \`backstage\` endpoint at [\`${BACKSTAGE_HOST}\`](http://${BACKSTAGE_HOST})" >> $GITHUB_STEP_SUMMARY
 
     - name: Create or Update Comment with Deployment URL
       uses: peter-evans/create-or-update-comment@v2
@@ -159,5 +171,4 @@ jobs:
 
           Your cluster `pr-${{ needs.cache-manifests-file.outputs.pr-number }}` was successfully created. Learn more about [Uffizzi virtual clusters](https://docs.uffizzi.com/virtual-clusters)
           To connect to this cluster, follow these steps:
-
         edit-mode: replace
