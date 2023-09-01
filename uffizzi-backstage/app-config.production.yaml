@@ -20,14 +20,13 @@ backend:
       port: ${POSTGRES_PORT}
       user: ${POSTGRES_USER}
       password: ${POSTGRES_PASSWORD}
-  cache:
-    store: memory
   cors:
     origin: ${UFFIZZI_URL}
     methods: [GET, HEAD, PATCH, POST, PUT, DELETE]
     credentials: true
   csp:
     connect-src: ["'self'", 'http:', 'https:']
+    img-src: ["'self'", 'data:', 'https://cdnjs.cloudflare.com']
     # Content-Security-Policy directives follow the Helmet format: https://helmetjs.github.io/#reference
     # Default Helmet Content-Security-Policy values can be removed by setting the key to false
 
